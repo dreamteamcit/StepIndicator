@@ -23,7 +23,12 @@ class AnnularLayer: CAShapeLayer {
     
     // MARK: - Properties
     var tintColor:UIColor?
+    var displayNumberTintColor: UIColor?
+    var displayNumberColor: UIColor?
     var displayNumber = false
+    var failedCircleColor: UIColor?
+    var finishedCircleColor: UIColor?
+    var finishedCircleTintColor: UIColor?
     var step:Int = 0
     var annularDefaultColor: UIColor?
     
@@ -35,6 +40,12 @@ class AnnularLayer: CAShapeLayer {
     
     var isFinished:Bool = false {
         didSet{
+            self.updateStatus()
+        }
+    }
+    
+    var isFailed:Bool = false {
+        didSet {
             self.updateStatus()
         }
     }
@@ -89,7 +100,7 @@ class AnnularLayer: CAShapeLayer {
             self.path = nil
             self.drawFullCircleAnimated()
         }
-        else{
+        else {
             fullCircleLayer.removeFromSuperlayer()
             
             self.drawAnnularPath()
@@ -99,18 +110,21 @@ class AnnularLayer: CAShapeLayer {
                 
                 if isCurrent {
                     self.strokeColor = self.tintColor?.cgColor
+                    if isFailed {
+                        self.strokeColor = self.failedCircleColor?.cgColor
+                    }
                 }
-                else{
+                else {
                     self.strokeColor = self.annularDefaultColor?.cgColor
                 }
                 
                 self.drawText()
             }
-            else{
+            else {
                 self.centerTextLayer.removeFromSuperlayer()
                 self.strokeColor = self.annularDefaultColor?.cgColor
                 
-                if isCurrent {
+                if isCurrent || isFailed {
                     self.drawCenterCircleAnimated()
                 }
                 else{
@@ -141,7 +155,15 @@ class AnnularLayer: CAShapeLayer {
         self.centerCircleLayer.transform = AnnularLayer.originalScale
         self.centerCircleLayer.frame = self.bounds
         self.centerCircleLayer.anchorPoint = CGPoint(x:0.5,y:0.5)
-        self.centerCircleLayer.fillColor = self.tintColor?.cgColor
+        if isCurrent {
+            self.centerCircleLayer.fillColor = self.tintColor?.cgColor
+            if isFailed {
+                self.centerCircleLayer.fillColor = self.failedCircleColor?.cgColor
+            }
+        }
+        else {
+            self.centerCircleLayer.fillColor = self.failedCircleColor?.cgColor
+        }
         self.addSublayer(self.centerCircleLayer)
         
         self.centerTextLayer.removeFromSuperlayer()
@@ -162,6 +184,12 @@ class AnnularLayer: CAShapeLayer {
         let fontSize = sideLength * 0.65
         self.centerTextLayer.font = UIFont.boldSystemFont(ofSize: fontSize) as CFTypeRef
         self.centerTextLayer.fontSize = fontSize
+        if !isFinished && !isCurrent && !isFailed {
+            self.centerTextLayer.foregroundColor = displayNumberColor?.cgColor
+        }
+        else {
+            self.centerTextLayer.foregroundColor = displayNumberTintColor?.cgColor
+        }
         
         self.addSublayer(self.centerTextLayer)
     }
@@ -195,15 +223,17 @@ class AnnularLayer: CAShapeLayer {
         let fullCirclePath = UIBezierPath()
         let sideLength = fmin(self.frame.width, self.frame.height)
         let circlesRadius = sideLength / 2.0
-        
+
         fullCirclePath.addArc(withCenter: CGPoint(x:self.bounds.midX, y:self.bounds.midY), radius: circlesRadius, startAngle: 0.0, endAngle: 2 * CGFloat.pi, clockwise: true)
-        
+
         self.fullCircleLayer.path = fullCirclePath.cgPath
         self.fullCircleLayer.transform = AnnularLayer.originalScale
         self.fullCircleLayer.frame = self.bounds
-        self.fullCircleLayer.fillColor = self.tintColor?.cgColor
+        self.fullCircleLayer.fillColor = self.finishedCircleColor?.cgColor
         self.addSublayer(self.fullCircleLayer)
         
+        let img = UIImage(cgImage: AnnularLayer.flagCGImage!).maskWithColor(color:self.finishedCircleTintColor ?? .white)
+        self.flagLayer.contents = img?.cgImage
         let flagLayerWidth = self.fullCircleLayer.bounds.width * 0.8
         let flagLayerHeight = self.fullCircleLayer.bounds.height * 0.8
         self.flagLayer.frame = CGRect(x: self.fullCircleLayer.bounds.width * 0.2 / 2.0, y: self.fullCircleLayer.bounds.height * 0.2 / 2.0, width:flagLayerWidth, height:flagLayerHeight)
@@ -223,3 +253,30 @@ class AnnularLayer: CAShapeLayer {
     }
     
 }
+
+extension UIImage {
+    
+    func maskWithColor(color: UIColor) -> UIImage? {
+        let maskImage = cgImage!
+        
+        let width = size.width
+        let height = size.height
+        let bounds = CGRect(x: 0, y: 0, width: width, height: height)
+        
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let bitmapInfo = CGBitmapInfo(rawValue: CGImageAlphaInfo.premultipliedLast.rawValue)
+        let context = CGContext(data: nil, width: Int(width), height: Int(height), bitsPerComponent: 8, bytesPerRow: 0, space: colorSpace, bitmapInfo: bitmapInfo.rawValue)!
+        
+        context.clip(to: bounds, mask: maskImage)
+        context.setFillColor(color.cgColor)
+        context.fill(bounds)
+        
+        if let cgImage = context.makeImage() {
+            let coloredImage = UIImage(cgImage: cgImage)
+            return coloredImage
+        } else {
+            return nil
+        }
+    }
+}
+ 

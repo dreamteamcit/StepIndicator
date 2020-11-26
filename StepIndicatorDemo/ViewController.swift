@@ -14,6 +14,7 @@ class ViewController: UIViewController,UIScrollViewDelegate {
     @IBOutlet weak var scrollView:UIScrollView!
     
     private var isScrollViewInitialized = false
+    private var currentIndex = 0
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -21,22 +22,27 @@ class ViewController: UIViewController,UIScrollViewDelegate {
         // In this demo, the customizations have been done in Storyboard.
         
         // Customization by coding:
-        //self.stepIndicatorView.numberOfSteps = 5
-        //self.stepIndicatorView.currentStep = 0
-        //self.stepIndicatorView.circleColor = UIColor(red: 179.0/255.0, green: 189.0/255.0, blue: 194.0/255.0, alpha: 1.0)
-        //self.stepIndicatorView.circleTintColor = UIColor(red: 0.0/255.0, green: 180.0/255.0, blue: 124.0/255.0, alpha: 1.0)
-        //self.stepIndicatorView.circleStrokeWidth = 3.0
-        //self.stepIndicatorView.circleRadius = 10.0
-        //self.stepIndicatorView.lineColor = self.stepIndicatorView.circleColor
-        //self.stepIndicatorView.lineTintColor = self.stepIndicatorView.circleTintColor
-        //self.stepIndicatorView.lineMargin = 4.0
-        //self.stepIndicatorView.lineStrokeWidth = 2.0
-        //self.stepIndicatorView.displayNumbers = false //indicates if it displays numbers at the center instead of the core circle
-        //self.stepIndicatorView.direction = .leftToRight
-        //self.stepIndicatorView.showFlag = true
+//        self.stepIndicatorView.numberOfSteps = 6
+//        self.stepIndicatorView.currentStep = 0
+//        self.stepIndicatorView.circleColor = UIColor(red: 200.0/255.0, green: 200.0/255.0, blue: 200.0/255.0, alpha: 1.0)
+//        self.stepIndicatorView.circleTintColor = .blue
+//        self.stepIndicatorView.circleStrokeWidth = 15.0
+//        self.stepIndicatorView.circleRadius = 15.0
+//        self.stepIndicatorView.lineColor = self.stepIndicatorView.circleColor
+//        self.stepIndicatorView.lineTintColor = .black
+//        self.stepIndicatorView.lineMargin = 1.0
+//        self.stepIndicatorView.lineStrokeWidth = 2.0
+//        self.stepIndicatorView.displayNumbers = true //indicates if it displays numbers at the center instead of the core circle
+//        self.stepIndicatorView.displayNumberColor = .black
+//        self.stepIndicatorView.displayNumberTintColor = .white
+//        self.stepIndicatorView.failedCircleColor = .red
+//        self.stepIndicatorView.finishedCircleColor = .green
+//        self.stepIndicatorView.finishedCircleTintColor = .black
+//        self.stepIndicatorView.direction = .leftToRight
+//        self.stepIndicatorView.showFlag = true
 
         // Example for apply constraints programmatically, enable it for test.
-        //self.applyNewConstraints()
+//        self.applyNewConstraints()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -80,6 +86,7 @@ class ViewController: UIViewController,UIScrollViewDelegate {
     func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         let pageIndex = scrollView.contentOffset.x / scrollView.frame.size.width
         stepIndicatorView.currentStep = Int(pageIndex)
+        currentIndex = Int(pageIndex)
     }
     
     
@@ -98,12 +105,46 @@ class ViewController: UIViewController,UIScrollViewDelegate {
         self.view.addSubview(stepIndicatorView)
         
         // Add new constraints programmatically
-        stepIndicatorView.widthAnchor.constraint(equalToConstant: 263.0).isActive = true
+        stepIndicatorView.widthAnchor.constraint(equalToConstant: 300.0).isActive = true
         stepIndicatorView.heightAnchor.constraint(equalToConstant: 80.0).isActive = true
         stepIndicatorView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor).isActive = true
         stepIndicatorView.topAnchor.constraint(equalTo: self.view.layoutMarginsGuide.topAnchor, constant:30.0).isActive = true
     
-        self.scrollView.topAnchor.constraint(equalTo: stepIndicatorView.bottomAnchor, constant: 8.0).isActive = true
+        self.scrollView.topAnchor.constraint(equalTo: stepIndicatorView.bottomAnchor, constant: 48.0).isActive = true
+    }
+    
+    
+    @IBAction func setFailedButtonPressed(_ sender: Any) {
+        stepIndicatorView.setStepFailed(index: currentIndex)
+    }
+    
+    @IBAction func setFinishedButtonPressed(_ sender: Any) {
+        stepIndicatorView.setStepFinished(index: currentIndex)
+    }
+    
+    @IBAction func nextButtonPressed(_ sender: Any) {
+        if currentIndex + 1 <= stepIndicatorView.numberOfSteps {
+            if currentIndex + 1 == stepIndicatorView.numberOfSteps {
+                stepIndicatorView.setStepFinished(index: currentIndex)
+                stepIndicatorView.currentStep = currentIndex + 1
+                scrollView.setContentOffset(CGPoint(x: CGFloat(currentIndex+1) * scrollView.frame.size.width, y: scrollView.contentOffset.y), animated: true)
+            }
+            else {
+                currentIndex = currentIndex + 1
+                stepIndicatorView.setCurrentStep(index: currentIndex)
+                scrollView.setContentOffset(CGPoint(x: CGFloat(currentIndex) * scrollView.frame.size.width, y: scrollView.contentOffset.y), animated: true)
+            }
+        }
+    }
+    
+    @IBAction func previousButtonPressed(_ sender: Any) {
+        if currentIndex - 1 >= 0 {
+            if !(currentIndex == stepIndicatorView.numberOfSteps - 1 && stepIndicatorView.currentStep == stepIndicatorView.numberOfSteps) {
+                currentIndex = currentIndex - 1
+            }
+            stepIndicatorView.setCurrentStep(index: currentIndex)
+            scrollView.setContentOffset(CGPoint(x: CGFloat(currentIndex) * scrollView.frame.size.width, y: scrollView.contentOffset.y), animated: true)
+        }
     }
 }
 

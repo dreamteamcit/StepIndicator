@@ -80,6 +80,18 @@ public class StepIndicatorView: UIView {
         }
     }
     
+    @IBInspectable public var displayNumberColor:UIColor = defaultColor {
+        didSet {
+            self.updateSubLayers()
+        }
+    }
+    
+    @IBInspectable public var displayNumberTintColor:UIColor = defaultTintColor {
+        didSet {
+            self.updateSubLayers()
+        }
+    }
+    
     @IBInspectable public var circleStrokeWidth:CGFloat = 3.0 {
         didSet{
             self.updateSubLayers()
@@ -93,6 +105,24 @@ public class StepIndicatorView: UIView {
     }
     
     @IBInspectable public var lineTintColor:UIColor = defaultTintColor {
+        didSet {
+            self.updateSubLayers()
+        }
+    }
+    
+    @IBInspectable public var failedCircleColor:UIColor = defaultColor {
+        didSet {
+            self.updateSubLayers()
+        }
+    }
+    
+    @IBInspectable public var finishedCircleColor:UIColor = defaultColor {
+        didSet {
+            self.updateSubLayers()
+        }
+    }
+    
+    @IBInspectable public var finishedCircleTintColor:UIColor = .white {
         didSet {
             self.updateSubLayers()
         }
@@ -132,7 +162,27 @@ public class StepIndicatorView: UIView {
         }
     }
     
+    // MARK: - Public Methods
+    public func setStepFailed(index: Int) {
+        if index >= 0 && index < self.numberOfSteps {
+            self.annularLayers[index].isFinished = false
+            self.annularLayers[index].isFailed = true
+        }
+    }
+    
+    public func setStepFinished(index: Int) {
+        if index >= 0 && index < self.numberOfSteps {
+            self.annularLayers[index].isFailed = false
+            self.annularLayers[index].isFinished = true
+        }
+    }
+    
+    public func setCurrentStep(index: Int) {
+        self.currentStep = index
+    }
+
     // MARK: - Functions
+
     private func createSteps() {
         if let layers = self.layer.sublayers {
             for layer in layers {
@@ -227,6 +277,11 @@ public class StepIndicatorView: UIView {
         annularLayer.tintColor = self.circleTintColor
         annularLayer.lineWidth = self.circleStrokeWidth
         annularLayer.displayNumber = self.displayNumbers
+        annularLayer.displayNumberTintColor = self.displayNumberTintColor
+        annularLayer.displayNumberColor = self.displayNumberColor
+        annularLayer.failedCircleColor = self.failedCircleColor
+        annularLayer.finishedCircleColor = self.finishedCircleColor
+        annularLayer.finishedCircleTintColor = self.finishedCircleTintColor
         annularLayer.showFlag = self.showFlag
     }
     
@@ -264,17 +319,20 @@ public class StepIndicatorView: UIView {
                 if !self.annularLayers[i].isFinished {
                     self.annularLayers[i].isFinished = true
                 }
-                
+                self.annularLayers[i].isFailed = false
+
                 self.setLineFinished(isFinished: true, index: i - 1)
             }
             else if i == step {
                 self.annularLayers[i].isFinished = false
+                self.annularLayers[i].isFailed = false
                 self.annularLayers[i].isCurrent = true
                 
                 self.setLineFinished(isFinished: true, index: i - 1)
             }
-            else{
+            else {
                 self.annularLayers[i].isFinished = false
+                self.annularLayers[i].isFailed = false
                 self.annularLayers[i].isCurrent = false
                 
                 self.setLineFinished(isFinished: false, index: i - 1)
@@ -289,4 +347,5 @@ public class StepIndicatorView: UIView {
             }
         }
     }
+
 }
