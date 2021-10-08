@@ -146,7 +146,7 @@ public class StepIndicatorView: UIView {
         }
     }
     
-    @IBInspectable var directionRaw: UInt {
+    @IBInspectable public var directionRaw: UInt {
         get{
             return self.direction.rawValue
         }
@@ -156,21 +156,21 @@ public class StepIndicatorView: UIView {
         }
     }
     
-    @IBInspectable var showFlag: Bool = true {
+    @IBInspectable public var showFlag: Bool = true {
         didSet {
             self.updateSubLayers()
         }
     }
     
     // MARK: - Public Methods
-    public func setStepFailed(index: Int) {
+    @objc public func setStepFailed(index: Int) {
         if index >= 0 && index < self.numberOfSteps {
             self.annularLayers[index].isFinished = false
             self.annularLayers[index].isFailed = true
         }
     }
     
-    public func setStepFinished(index: Int) {
+    @objc public func setStepFinished(index: Int) {
         if index >= 0 && index < self.numberOfSteps {
             self.annularLayers[index].isFailed = false
             self.annularLayers[index].isFinished = true
