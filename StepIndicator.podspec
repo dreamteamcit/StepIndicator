@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "StepIndicator"
-  s.version      = "1.0.9-dt"
+  s.version      = "1.0.9.1-dt"
   s.summary      = "An iOS Step Indicator Library."
   s.description  = <<-DESC
                     StepIndicator is an iOS library that indicates steps in an animated way.
@@ -11,7 +11,7 @@ Pod::Spec.new do |s|
   s.author       = { "Yun Chen" => "chenyun122@gmail.com" }
   s.platform     = :ios, "8.0"
   s.requires_arc = true
-  s.source       = { :git => "https://github.com/dreamteamcit/StepIndicator.git", :tag => "1.0.9-dt" }
+  s.source       = { :git => "https://github.com/dreamteamcit/StepIndicator.git", :tag => "1.0.9.1-dt" }
   s.source_files  = "StepIndicator", "StepIndicator/**/*.swift"
   s.resource_bundles = {
     'StepIndicator' => ['StepIndicator/**/*.xcassets']
